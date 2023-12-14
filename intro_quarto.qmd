@@ -1,0 +1,174 @@
+---
+title: "Demo 1: Quarto HTML and RevealJS"
+subtitle: "Bioinformatics Meeting 12/14"
+author: "Zach Siegel"
+format:
+  html5:
+    toc-title: Contents
+    toc: true
+    output-file: web_example
+    page-layout: full
+  revealjs:
+    toc-title: Contents
+    toc: true
+    output-file: presentation_example
+    smaller: true
+    # width: 50%
+    # scrollable: true
+execute:
+  echo: true
+  cache: true
+embed-resources: true
+render:
+  standalone: true
+  self-contained: true
+  self-contained-math: true
+---
+
+## Running, rendering this document
+
+```bash
+quarto preview intro_quarto.qmd --port 8080 # html
+quarto preview intro_quarto.qmd --port 8080 --to revealjs # slides
+quarto render intro_quarto.qmd # render to both
+```
+
+
+## Quarto `.qmd` Document Structure
+
+- Author in Markdown
+- Executable code blocks
+- Render to HTML (or PDF or HTML slides like these)
+- Excellent "preview" mode for authoring
+  - Hot reloads file on save
+  - Caches code block output
+
+
+## Tabs
+
+
+::: {.panel-tabset}
+
+### Tab 1: Define Data
+
+```{python}
+import pandas as pd
+df = pd.DataFrame(dict(
+    a=list(range(1000)),
+    b=list(range(1000, 2000)),
+))
+display(df.head())
+```
+
+### Tab 2: Style Dataframe
+
+```{python}
+import seaborn as sns
+
+# two ways to style dataframes
+styled = df.style.background_gradient(
+	axis=None,
+	cmap=sns.light_palette('red', as_cmap=True),
+	gmap=(df % 2 == 0).astype(float).values,
+).map(lambda val: 'opacity: 20%;' if (val % 2) == 0 else None )
+display(styled.hide([row for row in styled.index if row > 5]))
+```
+
+[Documentation of styling Pandas dataframes](https://pandas.pydata.org/docs/user_guide/style.html)
+
+### Tab 3: Plot
+
+```{python}
+import plotly.express as px
+fig = px.line(df, x='a', y='b')
+display(fig) # `display` is a Jupyter helper function needed to display more than one output per block
+```
+
+
+:::
+
+
+
+## Columns
+
+:::: {.columns}
+
+::: {.column width="45%" }
+
+
+
+
+Evaluated code block:
+```{python}
+x = 5**2
+print(f'Code block output: {x}')
+```
+
+Regular markdown code block:
+```python
+x = 5**2
+print(x)
+```
+
+:::
+
+::: {.column width="10%"}
+<!-- empty column to create gap -->
+:::
+
+::: {.column width="45%"}
+
+
+
+````qmd
+Evaluated code block:
+```{{python}}
+x = 5**2
+print(f'Code block output: {x}')
+```
+
+Regular markdown code block:
+```python
+x = 5**2
+print(x)
+```
+````
+
+:::
+
+::::
+
+
+## A nice animated Plotly plot
+
+```{python}
+#| title: GDP and Life Expectancy
+import plotly.express as px
+df = px.data.gapminder()
+px.scatter(
+  df, x="gdpPercap", y="lifeExp", 
+  animation_frame="year", animation_group="country",
+  size="pop", color="continent", hover_name="country", 
+  facet_col="continent", log_x=True, size_max=45, 
+  range_x=[100,100000], range_y=[25,90]
+)
+```
+
+## Summary of Features
+
+- Easy to author (basically markdown)
+- Version-controllable (plain text)
+- Render multiple outputs (HTML, RevealJS) from same `.qmd` (PDF and `.ipynb` are also options)
+- Live-updating `preview` mode
+  - Fast - code block outputs are cached until code block changes
+
+
+
+### Features in next demo
+
+- Render from Python (using Quarto CLI via `subprocess`)
+- Render multiple `.qmd` files (a Quarto "project") for each study (a Quarto "profile")
+  - All analyses linked in navbar (no need to put all plots in one file)
+  - All studies linked by static file server
+
+**First, a review of alternatives to Quarto**
